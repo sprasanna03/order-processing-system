@@ -1,30 +1,45 @@
 flowchart LR
+
 subgraph Client
-A[Customer/Admin]
+    A[Customer / Admin]
 end
 
 subgraph Gateway
-GW[API Gateway (JWT/RBAC)]
+    GW[API Gateway (JWT / RBAC)]
 end
 
 subgraph Bus
-K[(Kafka)]
+    K[(Kafka)]
 end
 
 subgraph Infra
-R[(Redis)]
+    R[(Redis Cache)]
 end
 
+subgraph Databases
+    DB1[(Orders DB - Postgres)]
+    DB2[(Inventory DB - Postgres)]
+    DB3[(Payments DB - Postgres)]
+    DB4[(Shipping DB - Postgres)]
+    DB5[(Notifications DB - Postgres)]
+end
+
+%% Request Flow
 A -->|REST| GW -->|/api/orders| ORD[Order Service]
+
+%% Events
 ORD -- order.created --> K
-K -- inventory.reserved/rejected --> INV[Inventory Service]
-INV -- payment.authorized/declined --> PAY[Payment Service]
+K -- inventory.reserved / rejected --> INV[Inventory Service]
+INV -- payment.authorized / declined --> PAY[Payment Service]
 PAY -- shipping.updated --> SHIP[Shipping Service]
 SHIP -- notification.send --> NOTIF[Notification Service]
+
+%% Infra
 INV <--> R
 
-ORD --- DB1[(Postgres)]
-INV --- DB2[(Postgres)]
-PAY --- DB3[(Postgres)]
-SHIP --- DB4[(Postgres)]
-NOTIF --- DB5[(Postgres)]
+%% Databases
+ORD --- DB1
+INV --- DB2
+PAY --- DB3
+SHIP --- DB4
+NOTIF --- DB5
