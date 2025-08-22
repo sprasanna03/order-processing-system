@@ -26,5 +26,5 @@ jobs:
         run: |
           for s in api-gateway order-service inventory-service payment-service shipping-service notification-service; do
             docker build -t ghcr.io/${{ github.repository_owner }}/$s:latest src/$s
-            docker push ghcr.io/${{ github.repository_owner }}/$s:latest
+            docker build -t order-service:latest ./src/order-servicedocker push ghcr.io/${{ github.repository_owner }}/$s:latest
           done

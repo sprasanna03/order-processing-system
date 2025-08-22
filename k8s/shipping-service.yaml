@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: shipping-service
+  namespace: orders
+spec:
+  selector:
+    app: shipping-service
+  ports:
+    - port: 80
+      targetPort: 8084
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shipping-service
+  namespace: orders
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: shipping-service
+  template:
+    metadata:
+      labels:
+        app: shipping-service
+    spec:
+      containers:
+        - name: shipping-service
+          image: ghcr.io/sprasanna03/shipping-service:latest
+          ports:
+            - containerPort: 8084
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: kafka.orders:9092
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: secret
