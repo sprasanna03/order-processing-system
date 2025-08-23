@@ -1,0 +1,144 @@
+version: "3.9"
+
+services:
+  api-gateway:
+    image: ghcr.io/sprasanna03/api-gateway:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - JWT_SECRET=devsecret
+    depends_on:
+      - kafka
+      - orders-db
+
+  order-service:
+    image: ghcr.io/sprasanna03/order-service:latest
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - DB_HOST=orders-db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=orders
+    depends_on:
+      - kafka
+      - orders-db
+
+  inventory-service:
+    image: ghcr.io/sprasanna03/inventory-service:latest
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - DB_HOST=inventory-db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=inventory
+    depends_on:
+      - kafka
+      - inventory-db
+
+  payment-service:
+    image: ghcr.io/sprasanna03/payment-service:latest
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - DB_HOST=payments-db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=payments
+    depends_on:
+      - kafka
+      - payments-db
+
+  shipping-service:
+    image: ghcr.io/sprasanna03/shipping-service:latest
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - DB_HOST=shipping-db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=shipping
+    depends_on:
+      - kafka
+      - shipping-db
+
+  notification-service:
+    image: ghcr.io/sprasanna03/notification-service:latest
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - DB_HOST=notifications-db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=notifications
+    depends_on:
+      - kafka
+      - notifications-db
+
+  # ---- Infra dependencies ----
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: bitnami/kafka:latest
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  # ---- Postgres DBs for each service ----
+  orders-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=orders
+    ports:
+      - "5433:5432"
+
+  inventory-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=inventory
+    ports:
+      - "5434:5432"
+
+  payments-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=payments
+    ports:
+      - "5435:5432"
+
+  shipping-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=shipping
+    ports:
+      - "5436:5432"
+
+  notifications-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=notifications
+    ports:
+      - "5437:5432"
