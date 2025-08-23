@@ -5,22 +5,24 @@ from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 
+# FastAPI HTTP bearer auth
 bearer = HTTPBearer(auto_error=False)
 
+# JWT settings (read from environment)
 JWT_SECRET = os.getenv("JWT_SECRET", "devsecret")
 JWT_ALG = os.getenv("JWT_ALG", "HS256")
 JWT_AUD = os.getenv("JWT_AUDIENCE", "orders-api")
 JWT_ISS = os.getenv("JWT_ISSUER", "orders-demo")
 
-
+# Type definition for the authenticated principal
 class Principal(t.TypedDict):
     sub: str
     roles: t.List[str]
 
-
+# Dependency to extract JWT and return principal
 def get_principal(token: HTTPAuthorizationCredentials = Depends(bearer)) -> Principal:
     if token is None:
-        raise HTTPException(401, "Missing bearer token")
+        raise HTTPException(status_code=401, detail="Missing bearer token")
     try:
         payload = jwt.decode(
             token.credentials,
@@ -30,18 +32,17 @@ def get_principal(token: HTTPAuthorizationCredentials = Depends(bearer)) -> Prin
             options={"require": ["aud"]},
         )
         now = int(time.time())
-kubectl apply -f k8s/ -n orders        if "iss" in payload and payload["iss"] != JWT_ISS:
+        if "iss" in payload and payload["iss"] != JWT_ISS:
             raise Exception("bad issuer")
         roles = payload.get("roles", [])
         return {"sub": payload.get("sub", "?"), "roles": roles}
     except Exception as e:
-        raise HTTPException(401, f"Invalid token: {e}")
+        raise HTTPException(status_code=401, detail=f"Invalid token: {e}")
 
-
+# Dependency factory to enforce role-based access
 def require_role(role: str):
     def dep(p: Principal = Depends(get_principal)):
         if role not in p["roles"]:
-            raise HTTPException(403, "Forbidden")
+            raise HTTPException(status_code=403, detail="Forbidden")
         return p
-
     return dep
