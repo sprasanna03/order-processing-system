@@ -1,0 +1,4 @@
+image:
+  repository: ghcr.io/sprasanna03/users-service
+  tag: latest
+replicaCount: 1

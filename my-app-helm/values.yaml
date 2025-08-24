@@ -1,0 +1,35 @@
+kafka:
+  fullnameOverride: my-app-kafka
+  kraft:
+    enabled: true
+    clusterId: "abcdefghijklmnopqrstuv"
+  listeners:
+    client:
+      protocol: PLAINTEXT
+
+postgresql:
+  fullnameOverride: my-app-postgresql
+  auth:
+    postgresPassword: postgres
+
+redis:
+  fullnameOverride: my-app-redis
+  architecture: standalone
+
+orders:
+  image:
+    repository: ghcr.io/sprasanna03/orders-service
+    tag: latest
+  replicaCount: 1
+
+payments:
+  image:
+    repository: ghcr.io/sprasanna03/payments-service
+    tag: latest
+  replicaCount: 1
+
+users:
+  image:
+    repository: ghcr.io/sprasanna03/users-service
+    tag: latest
+  replicaCount: 1

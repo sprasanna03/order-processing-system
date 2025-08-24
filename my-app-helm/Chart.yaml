@@ -1,0 +1,17 @@
+apiVersion: v2
+name: my-app
+description: Umbrella Helm chart for Kafka, Postgres, Redis, and microservices
+type: application
+version: 0.1.0
+appVersion: "1.0"
+
+dependencies:
+  - name: kafka
+    version: 26.5.0
+    repository: https://charts.bitnami.com/bitnami
+  - name: postgresql
+    version: 15.5.8
+    repository: https://charts.bitnami.com/bitnami
+  - name: redis
+    version: 19.5.0
+    repository: https://charts.bitnami.com/bitnami
